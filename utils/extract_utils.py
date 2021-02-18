@@ -61,7 +61,7 @@ def save_roi_features(args, cfg, im_file, im, dataset_dict, boxes, scores, featu
     MIN_BOXES = cfg.MODEL.BUA.EXTRACTOR.MIN_BOXES
     MAX_BOXES = cfg.MODEL.BUA.EXTRACTOR.MAX_BOXES
     CONF_THRESH = cfg.MODEL.BUA.EXTRACTOR.CONF_THRESH
-  
+
     dets = boxes[0] / dataset_dict['im_scale']
     scores = scores[0]
     feats = features_pooled[0]
@@ -81,6 +81,7 @@ def save_roi_features(args, cfg, im_file, im, dataset_dict, boxes, scores, featu
         keep_boxes = torch.argsort(max_conf, descending=True)[:MAX_BOXES]
     image_feat = feats[keep_boxes]
     image_bboxes = dets[keep_boxes]
+    soft_labels = scores[keep_boxes]
     image_objects_conf = np.max(scores[keep_boxes].numpy()[:,1:], axis=1)
     image_objects = np.argmax(scores[keep_boxes].numpy()[:,1:], axis=1)
     if not attr_scores is None:
@@ -108,7 +109,12 @@ def save_roi_features(args, cfg, im_file, im, dataset_dict, boxes, scores, featu
             }
 
     output_file = os.path.join(args.output_dir, im_file.split('.')[0])
-    np.savez_compressed(output_file, x=image_feat, bbox=image_bboxes, num_bbox=len(keep_boxes), image_h=np.size(im, 0), image_w=np.size(im, 1), info=info)
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
+    if args.soft_label:
+        np.savez_compressed(output_file, x=image_feat, bbox=image_bboxes, num_bbox=len(keep_boxes), soft_labels=soft_labels, image_h=np.size(im, 0), image_w=np.size(im, 1), info=info)
+    else:
+        np.savez_compressed(output_file, x=image_feat, bbox=image_bboxes, num_bbox=len(keep_boxes), image_h=np.size(im, 0), image_w=np.size(im, 1), info=info)
 
 def save_bbox(args, cfg, im_file, im, dataset_dict, boxes, scores):
     MIN_BOXES = cfg.MODEL.BUA.EXTRACTOR.MIN_BOXES

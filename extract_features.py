@@ -199,6 +199,9 @@ def main():
         default=None,
         nargs=argparse.REMAINDER,
     )
+    parser.add_argument('--soft-label', default=True, type=bool,
+                    help='whether to extract soft label')
+
 
     args = parser.parse_args()
 

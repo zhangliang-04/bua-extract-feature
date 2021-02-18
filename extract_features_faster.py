@@ -191,6 +191,9 @@ def main():
     parser.add_argument('--bbox-dir', dest='bbox_dir',
                         help='directory with bbox',
                         default="bbox")
+    parser.add_argument('--soft_label', default=True, type=bool,
+                        help='whether to extract soft label')
+
     parser.add_argument(
         "--resume",
         action="store_true",
