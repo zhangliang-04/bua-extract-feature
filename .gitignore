@@ -23,6 +23,7 @@ _ext
 build/
 dist/
 wheels/
+core.*
 
 # pytorch/python/numpy formats
 *.pth
