@@ -1,5 +1,5 @@
-# bua feature 环境配置
-多次复现稳定可以成功的环境配置如下：
+环境配置
+经过多次实验的环境配置如下：
 - python==3.7.6 （3.6.0安装pytorch时会报错）
 - torch==1.4.0 （1.5.0与某些版本cuda在安装detectron2或apex时会有问题）
 - cuda==10.0
@@ -11,7 +11,7 @@ pip install torch==1.4.0+cu100 torchvision==0.5.0+cu100 -f https://download.pyto
 pip install opencv-python
 
 ```
-接下来follow官方的setup即可
+接下来follow[README.md](README.md)中的setup即可
 #### Installation
 
 1. Clone the project including the required version (v0.2.1) of Detectron2
@@ -48,7 +48,7 @@ scp -r ~/miniconda2/envs/bua target_ip:~/miniconda2/envs/
 source activate bua # 老版本conda
 conda activate bua # 较新版本conda
 ```
-激活环境后 torch 和 apex 是配置好的，但是需要重新对detectron2和bua进行编译，需要重新执行：
+激活环境后 torch 和 apex 就没有问题了，但是需要重新对detectron2和bua进行编译，执行：
 ```
    # 编译detectron2
    cd detectron2
