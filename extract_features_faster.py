@@ -94,13 +94,17 @@ def extract_feat(split_idx, img_list, cfg, args, actor: ActorHandle):
     model.eval()
 
     generate_npz_list = []
-    for im_file in (img_list):
+    for im_path in (img_list):
+        if args.image_list is not None:
+            image_dir, im_file = os.path.split(im_path)
+        else:
+            image_dir, im_file = args.image_dir, im_path
         if os.path.exists(os.path.join(args.output_dir, im_file.split('.')[0]+'.npz')):
             actor.update.remote(1)
             continue
-        im = cv2.imread(os.path.join(args.image_dir, im_file))
+        im = cv2.imread(os.path.join(image_dir, im_file))
         if im is None:
-            print(os.path.join(args.image_dir, im_file), "is illegal!")
+            print(os.path.join(image_dir, im_file), "is illegal!")
             actor.update.remote(1)
             continue
         dataset_dict = get_image_blob(im, cfg.MODEL.PIXEL_MEAN)
@@ -187,7 +191,10 @@ def main():
                         default="features")
     parser.add_argument('--image-dir', dest='image_dir',
                         help='directory with images',
-                        default="image")
+                        default=None)
+    parser.add_argument('--image-list', dest='image_list',
+                        help='directory with images list json file',
+                        default=None)
     parser.add_argument('--bbox-dir', dest='bbox_dir',
                         help='directory with bbox',
                         default="bbox")
@@ -218,7 +225,12 @@ def main():
     CONF_THRESH = cfg.MODEL.BUA.EXTRACTOR.CONF_THRESH
 
     # Extract features.
-    imglist = os.listdir(args.image_dir)
+    assert (args.image_dir is None) ^ (args.image_list is None), 'only one in image_dir or image_list must be specified'
+    if args.image_dir is not None:
+        imglist = os.listdir(args.image_dir)
+    else:
+        import json
+        imglist = json.load(open(args.image_list, encoding='utf-8'))
     num_images = len(imglist)
     print('Number of images: {}.'.format(num_images))
 
