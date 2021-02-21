@@ -82,6 +82,10 @@ def generate_npz(extract_mode, pba: ActorHandle, *args):
         print('Invalid Extract Mode! ')
     pba.update.remote(1)
 
+@ray.remote
+def failed(path):
+    return path
+
 @ray.remote(num_gpus=1)
 def extract_feat(split_idx, img_list, cfg, args, actor: ActorHandle):
     num_images = len(img_list)
@@ -94,6 +98,7 @@ def extract_feat(split_idx, img_list, cfg, args, actor: ActorHandle):
     model.eval()
 
     generate_npz_list = []
+    failed_list = []
     for im_path in (img_list):
         if args.image_list is not None:
             image_dir, im_file = os.path.split(im_path)
@@ -105,6 +110,7 @@ def extract_feat(split_idx, img_list, cfg, args, actor: ActorHandle):
         im = cv2.imread(os.path.join(image_dir, im_file))
         if im is None:
             print(os.path.join(image_dir, im_file), "is illegal!")
+            failed_list.append(failed.remote(os.path.join(image_dir, im_file)))
             actor.update.remote(1)
             continue
         dataset_dict = get_image_blob(im, cfg.MODEL.PIXEL_MEAN)
@@ -112,10 +118,16 @@ def extract_feat(split_idx, img_list, cfg, args, actor: ActorHandle):
         if cfg.MODEL.BUA.EXTRACTOR.MODE == 1:
             attr_scores = None
             with torch.set_grad_enabled(False):
-                if cfg.MODEL.BUA.ATTRIBUTE_ON:
-                    boxes, scores, features_pooled, attr_scores = model([dataset_dict])
-                else:
-                    boxes, scores, features_pooled = model([dataset_dict])
+                try:
+                    if cfg.MODEL.BUA.ATTRIBUTE_ON:
+                        boxes, scores, features_pooled, attr_scores = model([dataset_dict])
+                    else:
+                        boxes, scores, features_pooled = model([dataset_dict])
+                except Exception:
+                    print('Extract roi feature from {} failed. Skipped'.format(os.path.join(image_dir, im_file)))
+                    failed_list.append(failed.remote(os.path.join(image_dir, im_file)))
+                    actor.update.remote(1)
+                    continue
             boxes = [box.tensor.cpu() for box in boxes]
             scores = [score.cpu() for score in scores]
             features_pooled = [feat.cpu() for feat in features_pooled]
@@ -157,8 +169,8 @@ def extract_feat(split_idx, img_list, cfg, args, actor: ActorHandle):
             generate_npz_list.append(generate_npz.remote(3, actor, 
                 args, cfg, im_file, im, dataset_dict, 
                 boxes, scores, features_pooled, attr_scores))
-
-    ray.get(generate_npz_list)
+    
+    return ray.get(generate_npz_list), ray.get(failed_list)
 
 
 def main():
@@ -249,8 +261,25 @@ def main():
         extract_feat_list.append(extract_feat.remote(i, img_lists[i], cfg, args, actor))
     
     pb.print_until_done()
-    ray.get(extract_feat_list)
+    extract_feat_list = ray.get(extract_feat_list)
+    extract_list = []
+    failed_list = []
+    for i in range(num_gpus):
+        extract_list.extend(extract_feat_list[i][0])
+        failed_list.extend(extract_feat_list[i][1])
     ray.get(actor.get_counter.remote())
+    if len(failed_list) == 0:
+        print('#############################################')
+        print('All image extract feature successfully!')
+        print('#############################################')
+    else:
+        import json
+        with open('failed_list.json', 'w', encoding='utf-8') as f:
+            json.dump(failed_list, f, indent=2, ensure_ascii=False)
+        print('#############################################')
+        print('Attention! {}/{} images encounter error!'.format(len(failed_list), num_images))
+        print('Please check in failed_list.json')
+        print('#############################################')
 
 if __name__ == "__main__":
     main()
