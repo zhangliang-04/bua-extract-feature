@@ -23,11 +23,20 @@
 #                     info=info)
 
 
+# extract multi30k
+# python -u extract_features_faster.py --mode caffe \
+#          --num-cpus 64 --gpu '0,1,2,3,4,5,6,7' \
+#          --config-file configs/bua-caffe/extract-bua-caffe-r101.yaml \
+#          --image-dir '/data2/ruc_vl_pretrain/multilingual_data/multi30k/flickr30k_images' --bbox-dir test_extract/bbox --resume \
+#          --out-dir '/data2/ruc_vl_pretrain/multilingual_data/multi30k/npzs'
+#          #--out-dir '/data8/zl/multi30k/bua_feature_with_softlabels'
+#          #--out-dir '/data8/zl/multi30k/bbox_bua_feature' 
 
+# extract xyb candidates
 python -u extract_features_faster.py --mode caffe \
          --num-cpus 64 --gpu '0,1,2,3,4,5,6,7' \
          --config-file configs/bua-caffe/extract-bua-caffe-r101.yaml \
-         --image-dir '/data2/ruc_vl_pretrain/multilingual_data/multi30k/flickr30k_images' --bbox-dir test_extract/bbox --resume \
-         --out-dir '/data2/ruc_vl_pretrain/multilingual_data/multi30k/npzs'
+         --image-list '/data3/downstream_anwenhu/xyb/candidate_xyb.json' --bbox-dir test_extract/bbox --resume \
+         --out-dir '/data3/ruc_vl_pretrain/xyb/npzs'
          #--out-dir '/data8/zl/multi30k/bua_feature_with_softlabels'
          #--out-dir '/data8/zl/multi30k/bbox_bua_feature' 
