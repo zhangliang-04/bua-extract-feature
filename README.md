@@ -36,7 +36,7 @@ Note that most of the requirements above are needed for Detectron2.
 1. Clone the project including the required version (v0.2.1) of Detectron2
    ```bash
    # clone the repository inclduing Detectron2(@be792b9) 
-   $ git clone --recursive https://github.com/MILVLG/bottom-up-attention.pytorch
+   $ git clone --recursive https://github.com/zhangliang-04/bua-extract-feature.git
    ```
    
 2. Install Detectron2
