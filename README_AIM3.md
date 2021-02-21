@@ -59,6 +59,7 @@ conda activate bua # 较新版本conda
    pip install ray
 ```
 `extract_features_faster.py`比`extract_features.py`快 \
-根据需要修改[utils/extract_utils.py](utils/extract_utils.py) 调整保存特征的内容和格式
+注意使用`extract_features_faster.py`提取特征时，使用的cpu:gpu数量为8:1，否则会影响速度，详见[这里](https://github.com/MILVLG/bottom-up-attention.pytorch/pull/41) \
+根据需要修改[utils/extract_utils.py](utils/extract_utils.py) 调整保存特征的内容和格式.
 
 增加了`--image-list`参数 按图片路径`list`提取特征 输入是`json`格式的`list`
