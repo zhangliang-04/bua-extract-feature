@@ -25,8 +25,9 @@
 
 
 python -u extract_features_faster.py --mode caffe \
-         --num-cpus 32 --gpu '2,5,7' \
-         --config-file configs/bua-caffe/extract-bua-caffe-r152.yaml \
-         --image-dir '/data7/syq/multi30k/flickr30k_images' --bbox-dir test_extract/bbox --resume \
-         --out-dir '/data8/zl/multi30k/bua_feature_with_softlabels'
+         --num-cpus 64 --gpu '0,1,2,3,4,5,6,7' \
+         --config-file configs/bua-caffe/extract-bua-caffe-r101.yaml \
+         --image-dir '/data2/ruc_vl_pretrain/multilingual_data/multi30k/flickr30k_images' --bbox-dir test_extract/bbox --resume \
+         --out-dir '/data2/ruc_vl_pretrain/multilingual_data/multi30k/npzs'
+         #--out-dir '/data8/zl/multi30k/bua_feature_with_softlabels'
          #--out-dir '/data8/zl/multi30k/bbox_bua_feature' 

@@ -10,6 +10,31 @@ PIXEL_MEANS = np.array([[[102.9801, 115.9465, 122.7717]]])
 TEST_SCALES = (600,)
 TEST_MAX_SIZE = 1000
 
+def get_norm_bb(bboxes, image_w, image_h):
+    '''
+    normalized 6-dim vector.
+    return (num_bbx, 6)
+    '''
+    box_width = bboxes[:, 2] - bboxes[:, 0]
+    box_height = bboxes[:, 3] - bboxes[:, 1]
+    scaled_width = box_width / image_w
+    scaled_height = box_height / image_h
+    scaled_x = bboxes[:, 0] / image_w
+    scaled_y = bboxes[:, 1] / image_h
+
+    box_width = box_width[..., np.newaxis]
+    box_height = box_height[..., np.newaxis]
+    scaled_width = scaled_width[..., np.newaxis]
+    scaled_height = scaled_height[..., np.newaxis]
+    scaled_x = scaled_x[..., np.newaxis]
+    scaled_y = scaled_y[..., np.newaxis]
+
+    normalized_bbox = np.concatenate((scaled_x, scaled_y,
+                                    scaled_x + scaled_width,
+                                    scaled_y + scaled_height,
+                                    scaled_width, scaled_height), axis=1)
+    return normalized_bbox
+
 def im_list_to_blob(ims):
     """Convert a list of images into a network input.
 
@@ -111,10 +136,21 @@ def save_roi_features(args, cfg, im_file, im, dataset_dict, boxes, scores, featu
     output_file = os.path.join(args.output_dir, im_file.split('.')[0])
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
-    if args.soft_label:
-        np.savez_compressed(output_file, x=image_feat, bbox=image_bboxes, num_bbox=len(keep_boxes), soft_labels=soft_labels, image_h=np.size(im, 0), image_w=np.size(im, 1), info=info)
-    else:
-        np.savez_compressed(output_file, x=image_feat, bbox=image_bboxes, num_bbox=len(keep_boxes), image_h=np.size(im, 0), image_w=np.size(im, 1), info=info)
+    # if args.soft_label:
+    #     np.savez_compressed(output_file, x=image_feat, bbox=image_bboxes, num_bbox=len(keep_boxes), soft_labels=soft_labels, image_h=np.size(im, 0), image_w=np.size(im, 1), info=info)
+    # else:
+    #     np.savez_compressed(output_file, x=image_feat, bbox=image_bboxes, num_bbox=len(keep_boxes), image_h=np.size(im, 0), image_w=np.size(im, 1), info=info)
+    image_h, image_w = np.size(im, 0), np.size(im, 1)    
+    norm_bbox = get_norm_bb(image_bboxes, image_w=image_w, image_h=image_h)
+    norm_bbox = norm_bbox.astype(np.float16)
+    features = image_feat.numpy().astype(np.float16)
+    conf = image_objects_conf.astype(np.float16)
+    soft_labels = soft_labels.numpy().astype(np.float16)
+    np.savez_compressed(output_file, 
+                        norm_bb=norm_bbox,
+                        features=features,
+                        conf=conf,
+                        soft_labels=soft_labels)
 
 def save_bbox(args, cfg, im_file, im, dataset_dict, boxes, scores):
     MIN_BOXES = cfg.MODEL.BUA.EXTRACTOR.MIN_BOXES
