@@ -1,5 +1,5 @@
 # bottom-up-attention.pytorch
-Additional README for setting up in [here](README_AIM3.md) \
+Additional README for setting up could be found in [here](README_AIM3.md) \
 This repository contains a **PyTorch** reimplementation of the [bottom-up-attention](https://github.com/peteanderson80/bottom-up-attention) project based on *Caffe*. 
 
 We use [Detectron2](https://github.com/facebookresearch/detectron2) as the backend to provide completed functions including training, testing and feature extraction. Furthermore, we migrate the pre-trained Caffe-based model from the original repository which can extract **the same visual features** as the original model (with deviation < 0.01).
