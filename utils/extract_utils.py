@@ -136,23 +136,26 @@ def save_roi_features(args, cfg, im_file, im, dataset_dict, boxes, scores, featu
     output_file = os.path.join(args.output_dir, im_file.split('.')[0])
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
-    if args.soft_label:
-        np.savez_compressed(output_file, x=image_feat, bbox=image_bboxes, num_bbox=len(keep_boxes), soft_labels=soft_labels, image_h=np.size(im, 0), image_w=np.size(im, 1), info=info)
+    if args.feat_struct == 'default':
+        if args.soft_label:
+            np.savez_compressed(output_file, x=image_feat, bbox=image_bboxes, num_bbox=len(keep_boxes), soft_labels=soft_labels, image_h=np.size(im, 0), image_w=np.size(im, 1), info=info)
+        else:
+            np.savez_compressed(output_file, x=image_feat, bbox=image_bboxes, num_bbox=len(keep_boxes), image_h=np.size(im, 0), image_w=np.size(im, 1), info=info)
+    elif args.feat_struct == 'uniter':
+        # for uniter
+        image_h, image_w = np.size(im, 0), np.size(im, 1)    
+        norm_bbox = get_norm_bb(image_bboxes, image_w=image_w, image_h=image_h)
+        norm_bbox = norm_bbox.astype(np.float16)
+        features = image_feat.numpy().astype(np.float16)
+        conf = image_objects_conf.astype(np.float16)
+        soft_labels = soft_labels.numpy().astype(np.float16)
+        np.savez_compressed(output_file, 
+                            norm_bb=norm_bbox,
+                            features=features,
+                            conf=conf,
+                            soft_labels=soft_labels)
     else:
-        np.savez_compressed(output_file, x=image_feat, bbox=image_bboxes, num_bbox=len(keep_boxes), image_h=np.size(im, 0), image_w=np.size(im, 1), info=info)
-    
-    # # for uniter
-    # image_h, image_w = np.size(im, 0), np.size(im, 1)    
-    # norm_bbox = get_norm_bb(image_bboxes, image_w=image_w, image_h=image_h)
-    # norm_bbox = norm_bbox.astype(np.float16)
-    # features = image_feat.numpy().astype(np.float16)
-    # conf = image_objects_conf.astype(np.float16)
-    # soft_labels = soft_labels.numpy().astype(np.float16)
-    # np.savez_compressed(output_file, 
-    #                     norm_bb=norm_bbox,
-    #                     features=features,
-    #                     conf=conf,
-    #                     soft_labels=soft_labels)
+        raise NotImplementedError
 
 def save_bbox(args, cfg, im_file, im, dataset_dict, boxes, scores):
     MIN_BOXES = cfg.MODEL.BUA.EXTRACTOR.MIN_BOXES

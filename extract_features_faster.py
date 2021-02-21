@@ -210,8 +210,10 @@ def main():
     parser.add_argument('--bbox-dir', dest='bbox_dir',
                         help='directory with bbox',
                         default="bbox")
-    parser.add_argument('--soft_label', default=True, type=bool,
+    parser.add_argument('--soft-label', default=True, type=bool,
                         help='whether to extract soft label')
+    parser.add_argument('--feat-struct', default='default', type=str,
+                            help='structure of feature to save')
 
     parser.add_argument(
         "--resume",
