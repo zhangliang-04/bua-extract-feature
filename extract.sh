@@ -1,3 +1,12 @@
+# sample
+
+python -u extract_features_faster.py --mode caffe \
+         --num-cpus 64 --gpu '0,1,2,3,4,5,6,7' \
+         --config-file configs/bua-caffe/extract-bua-caffe-r101.yaml \
+         --image-dir '<img-dir>' --bbox-dir test_extract/bbox --resume \
+         --out-dir '<output_npz_dir>'
+         --feat-struct 'uniter'
+
 # python -u  extract_features_faster.py --mode caffe \
 #          --num-cpus 8 --gpu '0' \
 #          --extract-mode 'roi_feats' \
@@ -33,12 +42,12 @@
 #          #--out-dir '/data8/zl/multi30k/bbox_bua_feature' 
 
 # extract xyb candidates
-python -u extract_features_faster.py --mode caffe \
-         --num-cpus 64 --gpu '0,1,2,3,4,5,6,7' \
-         --config-file configs/bua-caffe/extract-bua-caffe-r101.yaml \
-         --image-list '/data3/downstream_anwenhu/xyb/candidate_xyb.json' --bbox-dir test_extract/bbox --resume \
-         --out-dir '/data3/ruc_vl_pretrain/xyb/candidate_npzs'
-         --feat-struct 'uniter'
+# python -u extract_features_faster.py --mode caffe \
+#          --num-cpus 64 --gpu '0,1,2,3,4,5,6,7' \
+#          --config-file configs/bua-caffe/extract-bua-caffe-r101.yaml \
+#          --image-list '/data3/downstream_anwenhu/xyb/candidate_xyb.json' --bbox-dir test_extract/bbox --resume \
+#          --out-dir '/data3/ruc_vl_pretrain/xyb/candidate_npzs'
+#          --feat-struct 'uniter'
          #--out-dir '/data8/zl/multi30k/bua_feature_with_softlabels'
          #--out-dir '/data8/zl/multi30k/bbox_bua_feature' 
 
